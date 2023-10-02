@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mariadb
+  name: mariadb-deployment-volume-mount-demo
+spec:
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:latest
+        env:
+          - name:  MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name:  mysql-cred
+                key:  MYSQL_ROOT_PASSWORD
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+   # mentioning volume mouting for calling the secret file
+        volumeMounts:
+          - name:  newsecret
+            mountPath: "/etc/newsecret"
+            readOnly: true
+      volumes:
+        - name:  newsecret
+          secret:
+           secretName: mysql-cred
